@@ -4,17 +4,39 @@
 
 <h1>Transactions</h1>
 <% transactions = Transaction.all %>
-<ul>
-<% for transaction in transactions%>
-<li>
-<%= transaction["amount"]%> KC from <%= User.find_by(id: transaction.from_user_id)&.name %> to <%= User.find_by(id: transaction.to_user_id)&.name %>
-</li>
-<% end %>
-</ul>
 
+<ol>
+  <% for transaction in transactions %>
+    <% from_user = User.find_by({"id" => transaction["from_user_id"]}) %>
+    <% to_user = User.find_by({"id" => transaction["to_user_id"]}) %>
+    <li>
+      <% if from_user %>
+        <%= transaction["amount"]%> 
+        KC from <%= from_user["name"] %> 
+        to <%= to_user["name"] %>
+      <% else %>
+        Initial coin offering: <%= transaction["amount"] %> to <%= to_user["name"] %>
+      <% end %>
+    </li>
+  <% end %>
+</ol>
 
 <!-- Step 2: Calculate and display the balances -->
 
+<% users = User.all %>
+
+<ul>
+  <% for user in users%>
+    <li>
+      Balance of <%= user["name"]%>
+      is 
+      <%= 
+      Transaction.where({"to_user_id" => user["id"]}).sum("amount") - 
+      Transaction.where({"from_user_id" => user["id"]}).sum("amount")
+      %>
+    </li>
+  <% end %>
+</ul>
 
 <!-- 
 Expected balances:
